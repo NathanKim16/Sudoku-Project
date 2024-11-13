@@ -1,13 +1,14 @@
 import pygame.font
 
 class Button():
-    def __init__(self, screen, msg, color, xPos, yPos):
+    def __init__(self, screen, msg, color, xPos, yPos, width, height):
         #Initialize button attributes.
         self.screen = screen
         self.screen_rect = screen.get_rect()
+        self.msg = msg
         
         #Set the dimensions and properties of the button.
-        self.width, self.height = 200, 50
+        self.width, self.height = width, height
         self.button_color = color
         self.text_color = (0,0,0)
         self.font = pygame.font.SysFont(None, 48)
@@ -19,8 +20,8 @@ class Button():
         self.rect.centery = yPos
         
         #The button essage needs to be prepped only once.
-        self.prep_msg(msg)
-        self.draw_button()
+        self.prep_msg(self.msg)
+        # self.draw_button()
     
     def prep_msg(self, msg):
         #Turn msg into a rendered image and center text on the button.
