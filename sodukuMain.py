@@ -14,7 +14,7 @@ def main():
         missingSquares = 0
         screen = pygame.display.set_mode(((screenWidth, screenHeight)))
         clock = pygame.time.Clock()        
-        while gameMenu:
+        while gameMenu: #Main menu state
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     gameMenu = False
@@ -42,18 +42,19 @@ def main():
             hardButton = Button(screen, "Hard", (255, 0, 0), (screenWidth/2), (screenHeight/2)+75, 200, 50)
             easyButton.draw_button()
             mediumButton.draw_button()
-            hardButton.draw_button()
-            
+            hardButton.draw_button()            
             pygame.display.flip()
             clock.tick(60)
+        
+        #Preparation for the game
         filledBoard = gf.generateBoard()
         board = copy.deepcopy(filledBoard) #Necessary to keep the original board
         board = gf.removeNumbers(board, missingSquares)
-        gf.printBoard(filledBoard)
-        gf.printBoard(board)
-        squares = gf.generateVisualBoard(screen, board, screenWidth, screenHeight)
+        gf.printBoard(filledBoard)#Prints answer key to the console
+        gf.printBoard(board)#Prints the board to the console
+        squares = gf.generateVisualBoard(screen, board, screenWidth, screenHeight) #Generates the visual board with each square as an object
         
-        while inGame:
+        while inGame: #Game state
             screen.fill("white")
             gf.displayBoard(screen, board, screenWidth, screenHeight, squares)
             gf.eventListener(screen, squares)

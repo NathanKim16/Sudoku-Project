@@ -94,12 +94,14 @@ def checkSquareClick(squares):
                     squares[j].button_color = "white"
                 elif squares[j].button_color == (240, 220, 120) and squares[j].given == True:
                     squares[j].button_color = "light gray"
+                    squares[j].prep_msg(squares[j].msg)
                 if squares[j].button_color == (240, 220, 121) and squares[j].msg != "":
                     squares[j].button_color = "white"
                     squares[j].prep_msg(squares[j].msg)
                     print("Fixed square number: " + str(squares[j].msg))
             #Set the selected square        
             squares[i].button_color = (240, 220, 120)
+            squares[i].prep_msg(squares[i].msg)#Corrects the rendered color around the number
             return i
         
 def prepareNumberInput(squares, squareNum, number):
