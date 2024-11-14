@@ -33,3 +33,8 @@ class Button():
         #Draw a blank button and then draw the message.
         self.screen.fill(self.button_color, self.rect)
         self.screen.blit(self.msg_image, self.msg_image_rect)
+
+class boardButton(Button):
+    def __init__(self, screen, msg, color, xPos, yPos, width, height, given):
+        super().__init__(screen, msg, color, xPos, yPos, width, height)
+        self.given = given
