@@ -4,10 +4,9 @@ import pygame
 from Button import Button, boardButton
 
 #ToDo List -------
-#1. Add a win screen
-#2. Add a lose screen
-#3. Add functionality for sketchin in numbers
-#4. Add menu buttons
+#1. Cleanup win screen
+#2. Cleanup lose screen
+#3. Add menu buttons
 
 def printBoard(board):
     for i in range(9):
@@ -98,7 +97,7 @@ def updateSelectedSquare(squares, squareNum):
             squares[j].prep_msg(squares[j].msg)
         if squares[j].state == "blank":
             squares[j].button_color = "white"
-        if squares[j].state == "filled":
+        if squares[j].state == "filled" or squares[j].state == "sketched":
             squares[j].button_color = "white"
             squares[j].prep_msg(squares[j].msg)
             print("Fixed square number: " + str(squares[j].msg))
@@ -108,9 +107,9 @@ def updateSelectedSquare(squares, squareNum):
         
 def prepareNumberInput(squares, squareNum, number):
     squares[squareNum].msg = str(number)
+    squares[squareNum].text_color = "dark gray"
     squares[squareNum].prep_msg(str(number))
-    squares[squareNum].button_color = (240, 220, 121)
-    squares[squareNum].state = "filled"
+    squares[squareNum].state = "sketched"
 
 def checkSquareClick(squares):
     for i in range(81):
@@ -118,6 +117,14 @@ def checkSquareClick(squares):
             print("Clicked on square: " + str(i))
             updateSelectedSquare(squares, i)
             return i
+        
+def checkNumberSubmit(event, squares, squareNum):
+    if event.key == pygame.K_RETURN:
+        print("Submitted number")
+        squares[squareNum].state = "filled"
+        squares[squareNum].text_color = "black"
+        squares[squareNum].prep_msg(str(squares[squareNum].msg))
+
 
 def checkNumberInput(event, squares, squareNum):
     if event.key == pygame.K_1:
@@ -170,7 +177,7 @@ def checkArrowInput(event, squares, squareNum):
 def checkGameState(board, squares):
     count = 0
     for i in range(81):
-        if squares[i].state == "blank":
+        if squares[i].state == "blank" or squares[i].state == "sketched":
             count += 1
     if count == 0:
         print("Board filled")
@@ -197,5 +204,6 @@ def eventListener(screen, squares):
                 squareNum = 0
             #Check for arrow key presses
             squareNum = checkArrowInput(event, squares, squareNum)
+            checkNumberSubmit(event, squares, squareNum)
             if squares[squareNum].state != "given":
                 checkNumberInput(event, squares, squareNum)

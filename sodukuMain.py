@@ -6,6 +6,11 @@ import gameFunctions as gf
 def main():
     try:
         pygame.init()
+        pygame.display.set_caption('Group 115 Soduku')
+        #Temporarily Commented so the code still works in VS Code
+        # icon = pygame.image.load("icon.png")
+        # pygame.display.set_icon(icon)
+        
         #Initialize variables
         screenWidth = 1200 #Keeping a 2:3 aspect ratio
         screenHeight = 800
