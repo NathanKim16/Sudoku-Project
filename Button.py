@@ -35,6 +35,6 @@ class Button():
         self.screen.blit(self.msg_image, self.msg_image_rect)
 
 class boardButton(Button):
-    def __init__(self, screen, msg, color, xPos, yPos, width, height, given):
+    def __init__(self, screen, msg, color, xPos, yPos, width, height, state):
         super().__init__(screen, msg, color, xPos, yPos, width, height)
-        self.given = given
+        self.state = state

@@ -3,6 +3,12 @@ from random import randint, sample
 import pygame
 from Button import Button, boardButton
 
+#ToDo List -------
+#1. Add a win screen
+#2. Add a lose screen
+#3. Add functionality for sketchin in numbers
+#4. Add menu buttons
+
 def printBoard(board):
     for i in range(9):
         for j in range(9):
@@ -50,9 +56,9 @@ def generateVisualBoard(screen, board, screenWidth, screenHeight):
     for i in range(9):
         for j in range(9):
             if board[i][j] == ".":
-                squares.append(boardButton(screen, "", "white", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), False))
+                squares.append(boardButton(screen, "", "white", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "blank"))
             else:
-                squares.append(boardButton(screen, str(board[i][j]), "light gray", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), True))
+                squares.append(boardButton(screen, str(board[i][j]), "light gray", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "given"))
     return squares
 
 def displayBoard(screen, board, screenWidth, screenHeight, squares):
@@ -78,37 +84,40 @@ def displayBoard(screen, board, screenWidth, screenHeight, squares):
     pygame.draw.rect(screen, "black", (leftBuffer-2, topBuffer-2, boardLength+8, boardLength+8), 5)
     #TODO: Draw the menu buttons
 
-def displayWinScreen():
-    return
+def displayWinScreen(screen, screenWidth, screenHeight):
+    Button(screen, "You win!", "green", screenWidth/2, screenHeight/2, 200, 50).draw_button()
 
-def displayLoseScreen():
-    return    
+def displayLoseScreen(screen, screenWidth, screenHeight):
+    Button(screen, "You lose!", "red", screenWidth/2, screenHeight/2, 200, 50).draw_button()
 
-def checkSquareClick(squares):
-    for i in range(81):
-        if squares[i].rect.collidepoint(pygame.mouse.get_pos()):
-            print("Clicked on square: " + str(i))
-            #Clear any previously selected squares
-            for j in range(81):
-                if squares[j].button_color == (240, 220, 120) and squares[j].msg == "":
-                    squares[j].button_color = "white"
-                elif squares[j].button_color == (240, 220, 120) and squares[j].given == True:
-                    squares[j].button_color = "light gray"
-                    squares[j].prep_msg(squares[j].msg)
-                if squares[j].button_color == (240, 220, 121) and squares[j].msg != "":
-                    squares[j].button_color = "white"
-                    squares[j].prep_msg(squares[j].msg)
-                    print("Fixed square number: " + str(squares[j].msg))
-            #Set the selected square        
-            squares[i].button_color = (240, 220, 120)
-            squares[i].prep_msg(squares[i].msg)#Corrects the rendered color around the number
-            return i
+def updateSelectedSquare(squares, squareNum):
+    #Clear any previously selected squares
+    for j in range(81):
+        if squares[j].state == "given":
+            squares[j].button_color = "light gray"
+            squares[j].prep_msg(squares[j].msg)
+        if squares[j].state == "blank":
+            squares[j].button_color = "white"
+        if squares[j].state == "filled":
+            squares[j].button_color = "white"
+            squares[j].prep_msg(squares[j].msg)
+            print("Fixed square number: " + str(squares[j].msg))
+    #Set the selected square        
+    squares[squareNum].button_color = (240, 220, 120)
+    squares[squareNum].prep_msg(squares[squareNum].msg)#Corrects the rendered color around the number
         
 def prepareNumberInput(squares, squareNum, number):
     squares[squareNum].msg = str(number)
     squares[squareNum].prep_msg(str(number))
     squares[squareNum].button_color = (240, 220, 121)
+    squares[squareNum].state = "filled"
 
+def checkSquareClick(squares):
+    for i in range(81):
+        if squares[i].rect.collidepoint(pygame.mouse.get_pos()):
+            print("Clicked on square: " + str(i))
+            updateSelectedSquare(squares, i)
+            return i
 
 def checkNumberInput(event, squares, squareNum):
     if event.key == pygame.K_1:
@@ -139,7 +148,39 @@ def checkNumberInput(event, squares, squareNum):
         print("Pressed 9")
         prepareNumberInput(squares, squareNum, 9)
 
+def checkArrowInput(event, squares, squareNum):
+    if event.key == pygame.K_LEFT:
+        print("Pressed left")
+        squareNum -= 1
+        updateSelectedSquare(squares, squareNum)
+    if event.key == pygame.K_RIGHT:
+        print("Pressed right")
+        squareNum += 1
+        updateSelectedSquare(squares, squareNum)
+    if event.key == pygame.K_UP:
+        print("Pressed up")
+        squareNum -= 9
+        updateSelectedSquare(squares, squareNum)
+    if event.key == pygame.K_DOWN:
+        print("Pressed down")
+        squareNum += 9
+        updateSelectedSquare(squares, squareNum)
+    return squareNum
+
+def checkGameState(board, squares):
+    count = 0
+    for i in range(81):
+        if squares[i].state == "blank":
+            count += 1
+    if count == 0:
+        print("Board filled")
+        for i in range(81):
+            if int(squares[i].msg) != board[i//9][i%9]:
+                return "Lost"           
+        return "Won"
+
 def eventListener(screen, squares):
+    global squareNum
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -147,11 +188,14 @@ def eventListener(screen, squares):
             mouseX, mouseY = pygame.mouse.get_pos() # Get the position of the mouse
             print("Clicked at: " + str(mouseX) + ", " + str(mouseY))
             #Check if a square was clicked
-            global squareNum
             squareNum = checkSquareClick(squares)
             #Check if a menu button was clicked
             #TODO: if button.rect.collidepoint(pygame.mouse.get_pos()):
         elif event.type == pygame.KEYDOWN:
             print("Key pressed")
-            if squares[squareNum].given == False:
+            if "squareNum" not in globals():
+                squareNum = 0
+            #Check for arrow key presses
+            squareNum = checkArrowInput(event, squares, squareNum)
+            if squares[squareNum].state != "given":
                 checkNumberInput(event, squares, squareNum)
