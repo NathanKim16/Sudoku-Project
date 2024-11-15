@@ -55,9 +55,9 @@ def generateVisualBoard(screen, board, screenWidth, screenHeight):
     for i in range(9):
         for j in range(9):
             if board[i][j] == ".":
-                squares.append(boardButton(screen, "", "white", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "blank"))
+                squares.append(boardButton(screen, "", "white", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "blank", 0))
             else:
-                squares.append(boardButton(screen, str(board[i][j]), "light gray", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "given"))
+                squares.append(boardButton(screen, str(board[i][j]), "light gray", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "given", 0))
     return squares
 
 def displayBoard(screen, board, screenWidth, screenHeight, squares):
@@ -81,13 +81,35 @@ def displayBoard(screen, board, screenWidth, screenHeight, squares):
     pygame.draw.line(screen, "dark gray", (leftBuffer+(boardLength/3)*2, topBuffer), (leftBuffer+(boardLength/3)*2, (topBuffer+boardLength)-1), 3)
     #Draw outer lines
     pygame.draw.rect(screen, "black", (leftBuffer-2, topBuffer-2, boardLength+8, boardLength+8), 5)
-    #TODO: Draw the menu buttons
+    #Menu buttons
+    resetButton = Button(screen, "Reset", (228, 8, 10), screenWidth/3, screenHeight-50, 100, 50, 10)
+    restartButton = Button(screen, "Restart", (228, 8, 10), screenWidth/2, screenHeight-50, 150, 50, 10)
+    exitButton = Button(screen, "Exit", (228, 8, 10), (screenWidth/3)*2, screenHeight-50, 100, 50, 10)
+    resetButton.draw_button()
+    restartButton.draw_button()
+    exitButton.draw_button()
+    return resetButton, restartButton, exitButton
 
 def displayWinScreen(screen, screenWidth, screenHeight):
-    Button(screen, "You win!", "green", screenWidth/2, screenHeight/2, 200, 50).draw_button()
+    winText = Button(screen, "You win!", "white", screenWidth/2, screenHeight/3, 200, 50, 0)
+    winText.text_color = "green"
+    winText.font = pygame.font.Font("fonts/sourGummy.ttf", 100)
+    winText.prep_msg(winText.msg)
+    exitButton = Button(screen, "Exit", "green", screenWidth/2, screenHeight/2, 200, 50, 10)
+    winText.draw_button()
+    exitButton.draw_button()
+    return exitButton
 
 def displayLoseScreen(screen, screenWidth, screenHeight):
-    Button(screen, "You lose!", "red", screenWidth/2, screenHeight/2, 200, 50).draw_button()
+    loseText = Button(screen, "You Lost", "white", screenWidth/2, screenHeight/3, 200, 50, 0)
+    loseText.text_color = "red"
+    loseText.font = pygame.font.Font("fonts/sourGummy.ttf", 100)
+    loseText.prep_msg(loseText.msg)
+    restartButton = Button(screen, "Restart", (228, 8, 10), screenWidth/2, screenHeight/2, 200, 50, 10)
+    loseText.draw_button()
+    restartButton.draw_button()
+    return restartButton
+
 
 def updateSelectedSquare(squares, squareNum):
     #Clear any previously selected squares
@@ -159,19 +181,21 @@ def checkArrowInput(event, squares, squareNum):
     if event.key == pygame.K_LEFT:
         print("Pressed left")
         squareNum -= 1
-        updateSelectedSquare(squares, squareNum)
     if event.key == pygame.K_RIGHT:
         print("Pressed right")
         squareNum += 1
-        updateSelectedSquare(squares, squareNum)
     if event.key == pygame.K_UP:
         print("Pressed up")
         squareNum -= 9
-        updateSelectedSquare(squares, squareNum)
     if event.key == pygame.K_DOWN:
         print("Pressed down")
         squareNum += 9
-        updateSelectedSquare(squares, squareNum)
+    #Check if the square number is out of bounds
+    if squareNum > 80:
+        squareNum = squareNum - 81
+    if squareNum < -80:
+        squareNum = squareNum + 81
+    updateSelectedSquare(squares, squareNum)
     return squareNum
 
 def checkGameState(board, squares):
@@ -186,8 +210,10 @@ def checkGameState(board, squares):
                 return "Lost"           
         return "Won"
 
-def eventListener(screen, squares):
+def eventListener(screen, squares, resetButton, restartButton, exitButton):
     global squareNum
+    global eventType
+    eventType = "none"
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -197,13 +223,21 @@ def eventListener(screen, squares):
             #Check if a square was clicked
             squareNum = checkSquareClick(squares)
             #Check if a menu button was clicked
-            #TODO: if button.rect.collidepoint(pygame.mouse.get_pos()):
+            if resetButton.rect.collidepoint(pygame.mouse.get_pos()):
+                print("Reset button clicked")
+                eventType = "reset"
+            if restartButton.rect.collidepoint(pygame.mouse.get_pos()):
+                print("Restart button clicked")
+                eventType = "restart"
+            if exitButton.rect.collidepoint(pygame.mouse.get_pos()):
+                print("Exit button clicked")
+                eventType = "exit"
         elif event.type == pygame.KEYDOWN:
             print("Key pressed")
             if "squareNum" not in globals():
                 squareNum = 0
             #Check for arrow key presses
-            squareNum = checkArrowInput(event, squares, squareNum)
-            checkNumberSubmit(event, squares, squareNum)
+            squareNum = checkArrowInput(event, squares, squareNum)            
             if squares[squareNum].state != "given":
                 checkNumberInput(event, squares, squareNum)
+                checkNumberSubmit(event, squares, squareNum)
