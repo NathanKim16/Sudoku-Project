@@ -1,11 +1,12 @@
 import pygame.font
 
 class Button():
-    def __init__(self, screen, msg, color, xPos, yPos, width, height, curve):
+    def __init__(self, screen, id, msg, color, xPos, yPos, width, height, curve):
         #Initialize button attributes.
         self.screen = screen
         self.screen_rect = screen.get_rect()
         self.msg = msg
+        self.id = id
         
         #Set the dimensions and properties of the button.
         self.width, self.height = width, height
@@ -35,8 +36,8 @@ class Button():
         self.screen.blit(self.msg_image, self.msg_image_rect)
 
 class boardButton(Button):
-    def __init__(self, screen, msg, color, xPos, yPos, width, height, state, curve):
-        super().__init__(screen, msg, color, xPos, yPos, width, height, curve)
+    def __init__(self, screen, id, msg, color, xPos, yPos, width, height, state, curve):
+        super().__init__(screen, id, msg, color, xPos, yPos, width, height, curve)
         self.state = state
         self.curve = 0
     def prep_msg(self, msg):
@@ -45,7 +46,3 @@ class boardButton(Button):
         self.msg_image = self.font.render(msg, True, self.text_color, self.button_color)
         self.msg_image_rect = self.msg_image.get_rect()
         self.msg_image_rect.center = self.rect.center
-    # def draw_button(self):
-    #     #Draw a blank button and then draw the message.
-    #     pygame.draw.rect(self.screen, self.button_color, self.rect, border_radius=curve)
-    #     self.screen.blit(self.msg_image, self.msg_image_rect)
