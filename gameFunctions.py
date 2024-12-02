@@ -1,7 +1,9 @@
 #Imports
 from random import randint, sample
 import pygame
+import copy
 from Button import Button, boardButton
+from sudoku_generator import SudokuGenerator
 
 #ToDo List -------
 #1. Cleanup win screen
@@ -14,36 +16,14 @@ def printBoard(board):
             print(board[i][j], end = " ")
         print()
 
-def generateBoard():
-    base = 3
-    side = base*base
-
-    # pattern for a baseline valid solution
-    def pattern(r,c): 
-        num = (base*(r%base)+r//base+c)%side
-        return num
-    # randomize rows, columns and numbers (of valid base pattern)
-    def shuffle(s):
-        return sample(s,len(s)) 
-    rBase = range(base) 
-    rows  = [ g*base + r for g in shuffle(rBase) for r in shuffle(rBase) ] 
-    cols  = [ g*base + c for g in shuffle(rBase) for c in shuffle(rBase) ]
-    nums  = shuffle(range(1,base*base+1))
-
-    # produce board using randomized baseline pattern
-    filledBoard = [[nums[pattern(r,c)] for c in cols] for r in rows ]
-    return filledBoard
-
-def removeNumbers(board, missingSquares):
-    # remove numbers from the board to create the puzzle
-    for i in range(missingSquares):
-        while True:
-            row = randint(0, 8)
-            col = randint(0, 8)
-            if board[row][col] != ".":
-                board[row][col] = "."
-                break
-    return board
+def generateBoard(size, removed):
+    sudoku = SudokuGenerator(size, removed)
+    sudoku.fill_values()
+    board = sudoku.get_board()
+    filledBoard = copy.deepcopy(board)
+    sudoku.remove_cells()
+    board = sudoku.get_board()
+    return filledBoard, board
 
 def prepareTimer(time):
     time = time/60
@@ -62,7 +42,7 @@ def generateVisualBoard(screen, board, screenWidth, screenHeight):
     squares = []
     for i in range(9):
         for j in range(9):
-            if board[i][j] == ".":
+            if board[i][j] == 0:
                 squares.append(boardButton(screen,"boardButton", "", "white", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "blank", 0))
             else:
                 squares.append(boardButton(screen,"boardButton", str(board[i][j]), "light gray", leftBuffer+((boardLength/9)*j)+(boardLength/18), topBuffer+((boardLength/9)*i)+(boardLength/18), (boardLength/9), (boardLength/9), "given", 0))

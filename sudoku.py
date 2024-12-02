@@ -1,5 +1,4 @@
 import pygame
-import copy
 from Button import Button
 import gameFunctions as gf
 
@@ -57,10 +56,9 @@ def main():
                 clock.tick(60)
             
             #Preparation for the game
-            filledBoard = gf.generateBoard()
-            board = copy.deepcopy(filledBoard) #Necessary to keep the original board
-            board = gf.removeNumbers(board, missingSquares)
+            filledBoard, board = gf.generateBoard(9, missingSquares)
             gf.printBoard(filledBoard)#Prints answer key to the console
+            print("")
             gf.printBoard(board)#Prints the board to the console
             print("Game Event Log:")
             squares = gf.generateVisualBoard(screen, board, screenWidth, screenHeight) #Generates the visual board with each square as an object
